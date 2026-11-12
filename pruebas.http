@@ -1,0 +1,145 @@
+@host = http://localhost:5153
+@json = application/json
+
+### 01 
+GET {{host}}/api/albumes
+
+### 02 
+GET {{host}}/api/albumes?genero=Rock&anio=1969
+
+### 03 
+GET {{host}}/api/albumes/1
+
+### 04  
+GET {{host}}/api/albumes/1/canciones
+
+### 05 
+GET {{host}}/api/canciones?albumId=2&duracionMax=300
+
+### 06 
+GET {{host}}/api/canciones/1
+
+### 07 
+# @name crearAlbum
+POST {{host}}/api/albumes
+Content-Type: {{json}}
+
+{
+  "titulo": "Nevermind",
+  "artista": "Nirvana",
+  "genero": "Rock",
+  "anioLanzamiento": 1991
+}
+
+### 08 
+PUT {{host}}/api/albumes/{{crearAlbum.response.body.$.id}}
+Content-Type: {{json}}
+
+{
+  "titulo": "Nevermind",
+  "artista": "Nirvana",
+  "genero": "Grunge",
+  "anioLanzamiento": 1991
+}
+
+### 09 
+# @name crearCancion
+POST {{host}}/api/canciones
+Content-Type: {{json}}
+
+{
+  "albumId": {{crearAlbum.response.body.$.id}},
+  "titulo": "Smells Like Teen Spirit",
+  "numeroPista": 1,
+  "duracionSegundos": 301
+}
+
+### 10 PUT canción 
+PUT {{host}}/api/canciones/{{crearCancion.response.body.$.id}}
+Content-Type: {{json}}
+
+{
+  "albumId": {{crearAlbum.response.body.$.id}},
+  "titulo": "Smells Like Teen Spirit",
+  "numeroPista": 1,
+  "duracionSegundos": 301,
+  "reproducciones": 10
+}
+
+### 11 POST álbum con datos inválidos
+POST {{host}}/api/albumes
+Content-Type: {{json}}
+
+{
+  "titulo": "",
+  "artista": "Alguien",
+  "genero": "Pop",
+  "anioLanzamiento": 3000
+}
+
+### 12  PUT álbum con datos inválidos
+PUT {{host}}/api/albumes/1
+Content-Type: {{json}}
+
+{
+  "titulo": "Abbey Road",
+  "artista": "The Beatles",
+  "genero": "Rock",
+  "anioLanzamiento": 1800
+}
+
+### 13 POST 
+POST {{host}}/api/canciones
+Content-Type: {{json}}
+
+{
+  "albumId": 9999,
+  "titulo": "Fantasma",
+  "numeroPista": 1,
+  "duracionSegundos": 200
+}
+
+
+### 14 
+GET {{host}}/api/albumes/9999
+
+### 15 
+GET {{host}}/api/canciones/9999
+
+### 16 
+GET {{host}}/api/albumes/9999/canciones
+
+
+
+
+
+### 17 
+POST {{host}}/api/albumes
+Content-Type: {{json}}
+
+{
+  "titulo": "Abbey Road",
+  "artista": "The Beatles",
+  "genero": "Rock",
+  "anioLanzamiento": 1969
+}
+
+### 18 
+POST {{host}}/api/canciones
+Content-Type: {{json}}
+
+{
+  "albumId": 1,
+  "titulo": "Otra canción",
+  "numeroPista": 1,
+  "duracionSegundos": 180
+}
+
+### 19 
+DELETE {{host}}/api/albumes/{{crearAlbum.response.body.$.id}}
+
+### 20
+DELETE {{host}}/api/canciones/{{crearCancion.response.body.$.id}}
+
+### 21 
+DELETE {{host}}/api/albumes/{{crearAlbum.response.body.$.id}}
