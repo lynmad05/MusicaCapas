@@ -13,7 +13,7 @@ public partial class MusicaContext : DbContext
     }
 
     public virtual DbSet<Album> Albums { get; set; }
-
+    public virtual DbSet<Usuario> Usuarios { get; set; }
     public virtual DbSet<Cancion> Cancions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -40,6 +40,13 @@ public partial class MusicaContext : DbContext
             entity.HasOne(d => d.Album).WithMany(p => p.Cancions)
                 .HasForeignKey(d => d.AlbumId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.HasIndex(e => e.Correo, "UQ_Usuarios_Correo").IsUnique();
+            entity.Property(e => e.Correo).HasMaxLength(100);
+            entity.Property(e => e.ClaveHash).HasMaxLength(100);
+            entity.Property(e => e.Rol).HasMaxLength(30);
         });
 
         OnModelCreatingPartial(modelBuilder);

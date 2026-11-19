@@ -3,10 +3,14 @@ using Musica.Entidades.Dtos;
 using Musica.Negocio.Excepciones;
 using Musica.Negocio.Servicios;
 
+using Microsoft.AspNetCore.Authorization;
+using Musica.Negocio.Seguridad;
 namespace Musica.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]  
+
 public class AlbumesController : ControllerBase
 {
     private readonly IAlbumServicio _albumServicio;
@@ -18,6 +22,7 @@ public class AlbumesController : ControllerBase
         _cancionServicio = cancionServicio;
     }
 
+    [AllowAnonymous]  
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AlbumDto>>> GetAlbumes(
         [FromQuery] string? artista,
@@ -43,6 +48,7 @@ public class AlbumesController : ControllerBase
         if (canciones == null) return NotFound();
         return Ok(canciones);
     }
+    [Authorize(Roles = RolesApp.CuradorOGerente)]
     [HttpPost]
     public async Task<ActionResult<AlbumDto>> PostAlbum(AlbumCrearDto dto)
     {
@@ -57,6 +63,7 @@ public class AlbumesController : ControllerBase
         }
     }
 
+    [Authorize(Roles = RolesApp.CuradorOGerente)]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutAlbum(int id, AlbumActualizarDto dto)
     {
@@ -71,6 +78,7 @@ public class AlbumesController : ControllerBase
         }
     }
 
+    [Authorize(Roles = RolesApp.GerenteCatalogo)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAlbum(int id)
     {

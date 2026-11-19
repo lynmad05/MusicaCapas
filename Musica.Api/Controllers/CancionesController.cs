@@ -3,17 +3,21 @@ using Musica.Entidades.Dtos;
 using Musica.Negocio.Excepciones;
 using Musica.Negocio.Servicios;
 
+using Microsoft.AspNetCore.Authorization;
+using Musica.Negocio.Seguridad;
+
 namespace Musica.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CancionesController : ControllerBase
 {
     private readonly ICancionServicio _servicio;
 
     public CancionesController(ICancionServicio servicio) => _servicio = servicio;
 
-    // GET api/canciones?albumId=&titulo=&duracionMax=
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CancionDto>>> GetCanciones(
         [FromQuery] int? albumId,
@@ -32,7 +36,7 @@ public class CancionesController : ControllerBase
         return Ok(cancion);
     }
 
-    // POST api/canciones
+    [Authorize(Roles = RolesApp.CuradorOGerente)]
     [HttpPost]
     public async Task<ActionResult<CancionDto>> PostCancion(CancionCrearDto dto)
     {
@@ -52,7 +56,7 @@ public class CancionesController : ControllerBase
         }
     }
 
-    // PUT api/canciones/5
+    [Authorize(Roles = RolesApp.CuradorOGerente)]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutCancion(int id, CancionActualizarDto dto)
     {
@@ -72,7 +76,7 @@ public class CancionesController : ControllerBase
         }
     }
 
-    // DELETE api/canciones/5
+   [Authorize(Roles = RolesApp.GerenteCatalogo)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCancion(int id)
     {

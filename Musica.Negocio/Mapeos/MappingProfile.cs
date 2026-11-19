@@ -14,6 +14,7 @@ public class MappingProfile : Profile
         CreateMap<Cancion, CancionDto>()
             .ForMember(dest => dest.AlbumTitulo, opt => opt.MapFrom(src => src.Album.Titulo));
 
+        CreateMap<Usuario, PerfilDto>();
         CreateMap<AlbumCrearDto, Album>();
         CreateMap<AlbumActualizarDto, Album>();
         CreateMap<CancionCrearDto, Cancion>();

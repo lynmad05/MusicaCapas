@@ -2,50 +2,109 @@
 @json = application/json
 
 ### 01 
-GET {{host}}/api/albumes
+# @name loginOyente
+POST {{host}}/api/auth/login
+Content-Type: {{json}}
+
+{ "correo": "oyente@musica.com", "clave": "Clave123!" }
+
 
 ### 02 
-GET {{host}}/api/albumes?genero=Rock&anio=1969
+# @name loginCurador
+POST {{host}}/api/auth/login
+Content-Type: {{json}}
 
-### 03 
-GET {{host}}/api/albumes/1
+{ "correo": "curador@musica.com", "clave": "Clave123!" }
 
-### 04  
-GET {{host}}/api/albumes/1/canciones
+### 03
+# @name loginGerente
+POST {{host}}/api/auth/login
+Content-Type: {{json}}
+
+{ "correo": "gerente@musica.com", "clave": "Clave123!" }
+
+
+### 04
+POST {{host}}/api/auth/registro
+Content-Type: {{json}}
+
+{ "correo": "prueba{{$timestamp}}@musica.com", "clave": "Clave123!" }
+
 
 ### 05 
-GET {{host}}/api/canciones?albumId=2&duracionMax=300
+POST {{host}}/api/auth/registro
+Content-Type: {{json}}
+
+{ "correo": "oyente@musica.com", "clave": "Clave123!" }
+
 
 ### 06 
-GET {{host}}/api/canciones/1
+POST {{host}}/api/auth/registro
+Content-Type: {{json}}
+
+{ "correo": "no-es-un-correo", "clave": "123" }
+
 
 ### 07 
+POST {{host}}/api/auth/login
+Content-Type: {{json}}
+
+{ "correo": "oyente@musica.com", "clave": "ClaveIncorrecta1" }
+
+### 08 
+POST {{host}}/api/auth/login
+Content-Type: {{json}}
+
+{ "correo": "nadie@musica.com", "clave": "Clave123!" }
+
+
+### 09
+GET {{host}}/api/auth/perfil
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+
+### 10
+GET {{host}}/api/auth/perfil
+
+### 11 
+GET {{host}}/api/albumes
+
+### 12 
+GET {{host}}/api/albumes/1
+
+### 13 
+GET {{host}}/api/albumes/1
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+### 14 
+POST {{host}}/api/albumes
+Content-Type: {{json}}
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+{ "titulo": "Nevermind", "artista": "Nirvana", "genero": "Rock", "anioLanzamiento": 1991 }
+
+
+### 15 
 # @name crearAlbum
 POST {{host}}/api/albumes
 Content-Type: {{json}}
+Authorization: Bearer {{loginCurador.response.body.$.token}}
 
-{
-  "titulo": "Nevermind",
-  "artista": "Nirvana",
-  "genero": "Rock",
-  "anioLanzamiento": 1991
-}
+{ "titulo": "Nevermind", "artista": "Nirvana", "genero": "Rock", "anioLanzamiento": 1991 }
 
-### 08 
+### 16
 PUT {{host}}/api/albumes/{{crearAlbum.response.body.$.id}}
 Content-Type: {{json}}
+Authorization: Bearer {{loginCurador.response.body.$.token}}
 
-{
-  "titulo": "Nevermind",
-  "artista": "Nirvana",
-  "genero": "Grunge",
-  "anioLanzamiento": 1991
-}
+{ "titulo": "Nevermind", "artista": "Nirvana", "genero": "Grunge", "anioLanzamiento": 1991 }
 
-### 09 
+
+### 17 
 # @name crearCancion
 POST {{host}}/api/canciones
 Content-Type: {{json}}
+Authorization: Bearer {{loginCurador.response.body.$.token}}
 
 {
   "albumId": {{crearAlbum.response.body.$.id}},
@@ -54,92 +113,44 @@ Content-Type: {{json}}
   "duracionSegundos": 301
 }
 
-### 10 PUT canción 
-PUT {{host}}/api/canciones/{{crearCancion.response.body.$.id}}
-Content-Type: {{json}}
-
-{
-  "albumId": {{crearAlbum.response.body.$.id}},
-  "titulo": "Smells Like Teen Spirit",
-  "numeroPista": 1,
-  "duracionSegundos": 301,
-  "reproducciones": 10
-}
-
-### 11 POST álbum con datos inválidos
-POST {{host}}/api/albumes
-Content-Type: {{json}}
-
-{
-  "titulo": "",
-  "artista": "Alguien",
-  "genero": "Pop",
-  "anioLanzamiento": 3000
-}
-
-### 12  PUT álbum con datos inválidos
-PUT {{host}}/api/albumes/1
-Content-Type: {{json}}
-
-{
-  "titulo": "Abbey Road",
-  "artista": "The Beatles",
-  "genero": "Rock",
-  "anioLanzamiento": 1800
-}
-
-### 13 POST 
-POST {{host}}/api/canciones
-Content-Type: {{json}}
-
-{
-  "albumId": 9999,
-  "titulo": "Fantasma",
-  "numeroPista": 1,
-  "duracionSegundos": 200
-}
-
-
-### 14 
-GET {{host}}/api/albumes/9999
-
-### 15 
-GET {{host}}/api/canciones/9999
-
-### 16 
-GET {{host}}/api/albumes/9999/canciones
-
-
-
-
-
-### 17 
-POST {{host}}/api/albumes
-Content-Type: {{json}}
-
-{
-  "titulo": "Abbey Road",
-  "artista": "The Beatles",
-  "genero": "Rock",
-  "anioLanzamiento": 1969
-}
-
 ### 18 
-POST {{host}}/api/canciones
-Content-Type: {{json}}
-
-{
-  "albumId": 1,
-  "titulo": "Otra canción",
-  "numeroPista": 1,
-  "duracionSegundos": 180
-}
+DELETE {{host}}/api/albumes/{{crearAlbum.response.body.$.id}}
+Authorization: Bearer {{loginCurador.response.body.$.token}}
 
 ### 19 
-DELETE {{host}}/api/albumes/{{crearAlbum.response.body.$.id}}
+DELETE {{host}}/api/canciones/{{crearCancion.response.body.$.id}}
+Authorization: Bearer {{loginCurador.response.body.$.token}}
 
 ### 20
-DELETE {{host}}/api/canciones/{{crearCancion.response.body.$.id}}
+DELETE {{host}}/api/albumes/{{crearAlbum.response.body.$.id}}
+Authorization: Bearer {{loginGerente.response.body.$.token}}
 
 ### 21 
+DELETE {{host}}/api/canciones/{{crearCancion.response.body.$.id}}
+Authorization: Bearer {{loginGerente.response.body.$.token}}
+
+### 22 
 DELETE {{host}}/api/albumes/{{crearAlbum.response.body.$.id}}
+Authorization: Bearer {{loginGerente.response.body.$.token}}
+
+### 23 
+GET {{host}}/api/albumes/9999
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+### 24 
+POST {{host}}/api/albumes
+Content-Type: {{json}}
+Authorization: Bearer {{loginCurador.response.body.$.token}}
+
+{ "titulo": "Abbey Road", "artista": "The Beatles", "genero": "Rock", "anioLanzamiento": 1969 }
+
+### 25
+POST {{host}}/api/albumes
+Content-Type: {{json}}
+Authorization: Bearer {{loginCurador.response.body.$.token}}
+
+{ 
+  "titulo": "", 
+  "artista": "Alguien",
+  "genero": "Pop",
+  "anioLanzamiento": 3000 }
