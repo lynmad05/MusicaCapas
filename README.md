@@ -1,6 +1,6 @@
-# Musica API en capas · DTOs y AutoMapper
+# Musica API en capas · DTOs, AutoMapper y autenticación JWT
 
-Web API REST en **capas** (Entidades, Datos, Negocio y API) desarrollada con **ASP.NET Core (.NET 10)** y **Entity Framework Core**. La API expone **solo DTOs** y los convierte con **AutoMapper**. Las entidades nunca salen de la API.
+Web API REST en **capas** (Entidades, Datos, Negocio y API) con **ASP.NET Core (.NET 10)** y **Entity Framework Core**. Expone solo DTOs (AutoMapper) y está protegida con **autenticación JWT** y **roles propios del negocio**.
 
 ## Datos del curso
 
@@ -9,161 +9,111 @@ Web API REST en **capas** (Entidades, Datos, Negocio y API) desarrollada con **A
 | **Curso** | Desarrollo de Aplicaciones Empresariales Avanzadas |
 | **Sección** | 6 - C24 - Sección C  |
 | **Docente** | Edwin William Arévalo Sermeño |
-| **Laboratorio** | API en capas con DTOs y AutoMapper (Semana 13) |
+| **Laboratorio** | API en capas con autenticación JWT (Semana 14) |
 | **Institución** | TECSUP |
 
 ## Qué problema resuelve
 
-Permite administrar un catálogo de álbumes y sus canciones desde cualquier aplicación (web o móvil), sin que esta se conecte directo a la base de datos. La API ordena el trabajo en capas para que cada parte tenga una sola responsabilidad: la base de datos, las reglas del negocio y la exposición de los endpoints.
+Administra un catálogo de álbumes y sus canciones. Cualquiera puede consultar el listado, pero las demás acciones exigen iniciar sesión y, según el rol, se puede crear, editar o eliminar contenido. Así el catálogo queda protegido y cada persona solo hace lo que le corresponde.
 
 ## Entidades y relación
 
 - **Album:** título, artista, género y año de lanzamiento.
-- **Cancion:** título, número de pista, duración en segundos, reproducciones y el álbum al que pertenece.
+- **Cancion:** título, número de pista, duración, reproducciones y álbum.
+- **Usuario:** correo (único), hash de la clave y rol.
 
-Relación **1:N**: un álbum tiene muchas canciones y cada canción pertenece a un solo álbum (`Cancion.AlbumId` es la clave foránea).
+Relación **1:N** entre Album y Cancion. La entidad Usuario es independiente.
 
-```mermaid
-erDiagram
-    ALBUM ||--o{ CANCION : "tiene"
-
-    ALBUM {
-        int Id PK
-        string Titulo
-        string Artista
-        string Genero
-        int AnioLanzamiento
-    }
-    CANCION {
-        int Id PK
-        int AlbumId FK
-        string Titulo
-        int NumeroPista
-        int DuracionSegundos
-        int Reproducciones
-    }
-```
-
-## Reglas de negocio
-
-Viven en la capa de Negocio (servicios) y lanzan `ReglaNegocioException`. El controlador la convierte en **409 Conflict**.
+## Reglas de negocio (409 Conflict)
 
 1. No se puede repetir un álbum con el mismo título y artista.
 2. No se puede repetir el número de pista dentro del mismo álbum.
 3. No se puede eliminar un álbum que ya tiene canciones.
+4. No se puede registrar un usuario con un correo que ya existe.
 
-Si el `albumId` de una canción no existe, el servicio lanza `DatoInvalidoException` y el controlador responde **400** con `ValidationProblem`.
+## Roles
+
+| Rol | Qué puede hacer |
+|---|---|
+| **Oyente** | Es el rol que recibe todo usuario nuevo. Consulta el catálogo completo y ve su perfil |
+| **Curador** | Todo lo del Oyente, y además crea y edita álbumes y canciones |
+| **GerenteCatalogo** | Todo lo del Curador, y además elimina álbumes y canciones |
+
+El rol lo asigna **el servidor** (el registro siempre crea un Oyente). Para subir de rol se cambia en la base de datos.
+
+## Matriz de permisos
+
+| Endpoint | Sin token | Oyente | Curador | GerenteCatalogo |
+|---|---|---|---|---|
+| POST /api/auth/registro | Sí | Sí | Sí | Sí |
+| POST /api/auth/login | Sí | Sí | Sí | Sí |
+| GET /api/auth/perfil | No (401) | Sí | Sí | Sí |
+| GET /api/albumes | Sí | Sí | Sí | Sí |
+| GET /api/albumes/{id} | No (401) | Sí | Sí | Sí |
+| GET /api/albumes/{id}/canciones | No (401) | Sí | Sí | Sí |
+| POST /api/albumes | No (401) | No (403) | Sí | Sí |
+| PUT /api/albumes/{id} | No (401) | No (403) | Sí | Sí |
+| DELETE /api/albumes/{id} | No (401) | No (403) | No (403) | Sí |
+| GET /api/canciones | Sí | Sí | Sí | Sí |
+| GET /api/canciones/{id} | No (401) | Sí | Sí | Sí |
+| POST /api/canciones | No (401) | No (403) | Sí | Sí |
+| PUT /api/canciones/{id} | No (401) | No (403) | Sí | Sí |
+| DELETE /api/canciones/{id} | No (401) | No (403) | No (403) | Sí |
 
 ## Arquitectura en capas
 
 ```mermaid
 flowchart LR
-    API["Musica.Api<br/>Controladores + Program.cs"] --> NEG["Musica.Negocio<br/>Servicios, reglas, MappingProfile"]
+    API["Musica.Api<br/>Controladores, JWT, Swagger"] --> NEG["Musica.Negocio<br/>Servicios, reglas, MappingProfile"]
     NEG --> DAT["Musica.Datos<br/>DbContext + repositorios"]
     DAT --> ENT["Musica.Entidades<br/>Entidades + DTOs"]
 ```
 
-| Proyecto | Contenido |
+Lo nuevo de esta semana:
+
+| Capa | Se agregó |
 |---|---|
-| **Musica.Entidades** | `Album`, `Cancion` (generadas con Scaffold, sin `[JsonIgnore]`) y los DTOs |
-| **Musica.Datos** | `MusicaContext` y repositorios con su interfaz (`IAlbumRepositorio`, `ICancionRepositorio`) |
-| **Musica.Negocio** | Servicios con su interfaz, reglas de negocio, excepciones y `MappingProfile` |
-| **Musica.Api** | Controladores, Swagger, inyección de dependencias en `Program.cs` |
+| **Entidades** | `Usuario`, `LoginDto`, `RegistroDto`, `TokenDto`, `PerfilDto` |
+| **Datos** | `IUsuarioRepositorio` y `UsuarioRepositorio` |
+| **Negocio** | `IAuthServicio` y `AuthServicio` (BCrypt y generación del token), `JwtOpciones`, `RolesApp` |
+| **API** | `AuthController`, autenticación JWT y Swagger con botón Authorize |
 
-El controlador solo usa **servicios (por su interfaz) y DTOs**: nunca el `DbContext` ni las entidades.
+## Cómo funciona el JWT
 
-## DTOs
+1. El cliente envía su correo y clave a `POST /api/auth/login`.
+2. El servicio busca el usuario y compara la clave con el hash usando BCrypt.
+3. Si es correcta, genera un token firmado con los claims `sub`, `email`, `role` y `jti`, y una fecha de vencimiento.
+4. El cliente envía el token en cada petición: `Authorization: Bearer <token>`.
+5. La API valida emisor, audiencia, vencimiento y firma, y aplica `[Authorize]`, `[AllowAnonymous]` o `[Authorize(Roles = "...")]`.
 
-| DTO | Uso |
-|---|---|
-| `AlbumDto` | Lectura. Incluye `TotalCanciones` |
-| `CancionDto` | Lectura. Incluye `AlbumTitulo` en lugar del objeto álbum |
-| `AlbumCrearDto` / `AlbumActualizarDto` | Entrada (POST y PUT) con Data Annotations |
-| `CancionCrearDto` / `CancionActualizarDto` | Entrada (POST y PUT) con Data Annotations |
+Si las credenciales no son válidas, el login responde **401** igual para correo inexistente o clave incorrecta, para no revelar qué correos existen.
 
-## Sustentación de los mapeos (MappingProfile)
+## Endpoints de autenticación
 
-| Mapeo | Origen → Destino | ¿Por qué en ese sentido? | Configuración especial |
+| Método | Ruta | Descripción | Respuestas |
 |---|---|---|---|
-| `Album` → `AlbumDto` | Entidad → DTO de lectura | Es lo que la API devuelve al cliente: la entidad no debe salir de la API | `ForMember`: `TotalCanciones` toma `Cancions.Count` |
-| `Cancion` → `CancionDto` | Entidad → DTO de lectura | Es lo que la API devuelve al cliente: la entidad no debe salir de la API | `ForMember`: `AlbumTitulo` toma el `Titulo` del álbum |
-| `AlbumCrearDto` → `Album` | DTO de entrada → Entidad | Es lo que llega del cliente y se convierte en entidad para guardarla; no se devuelve | Ninguna: los nombres coinciden (`Id` y `Cancions` los genera la base de datos) |
-| `AlbumActualizarDto` → `Album` | DTO de entrada → Entidad | Se usa con `Map(origen, destino)` para copiar los datos nuevos sobre la entidad que ya existe | Ninguna: los nombres coinciden |
-| `CancionCrearDto` → `Cancion` | DTO de entrada → Entidad | Es lo que llega del cliente y se convierte en entidad para guardarla; no se devuelve | Ninguna: los nombres coinciden |
-| `CancionActualizarDto` → `Cancion` | DTO de entrada → Entidad | Se usa con `Map(origen, destino)` para copiar los datos nuevos sobre la entidad que ya existe | Ninguna: los nombres coinciden |
-
-**No se usó `ReverseMap()`** porque cada dirección tiene un DTO distinto: el de lectura solo sale de la API y los de entrada solo entran. Un `ReverseMap` mezclaría los dos sentidos en un mismo DTO.
-
-## Endpoints
-
-### Álbumes · `/api/albumes`
-
-| Método | Ruta | Descripción |
-|---|---|---|
-| GET | `/api/albumes` | Lista álbumes. Filtros: `artista`, `genero`, `anio`, `q` |
-| GET | `/api/albumes/{id}` | Obtiene un álbum |
-| GET | `/api/albumes/{id}/canciones` | Canciones de un álbum (ruta anidada) |
-| POST | `/api/albumes` | Crea un álbum |
-| PUT | `/api/albumes/{id}` | Actualiza un álbum |
-| DELETE | `/api/albumes/{id}` | Elimina un álbum |
-
-### Canciones · `/api/canciones`
-
-| Método | Ruta | Descripción |
-|---|---|---|
-| GET | `/api/canciones` | Lista canciones. Filtros: `albumId`, `titulo`, `duracionMax` |
-| GET | `/api/canciones/{id}` | Obtiene una canción |
-| POST | `/api/canciones` | Crea una canción |
-| PUT | `/api/canciones/{id}` | Actualiza una canción |
-| DELETE | `/api/canciones/{id}` | Elimina una canción |
+| POST | `/api/auth/registro` | Crea un usuario con rol Oyente | 201, 400, 409 |
+| POST | `/api/auth/login` | Devuelve el token | 200, 400, 401 |
+| GET | `/api/auth/perfil` | Correo y rol tomados de los claims del token | 200, 401 |
 
 ## Códigos de respuesta
 
-| Código | Resultado | Cuándo |
-|---|---|---|
-| 200 | `Ok(datos)` | GET que devuelve DTOs |
-| 201 | `CreatedAtAction(...)` | POST correcto |
-| 204 | `NoContent()` | PUT y DELETE correctos |
-| 400 | `ValidationProblem(...)` | Datos inválidos del DTO de entrada o `albumId` inexistente |
-| 404 | `NotFound()` | El recurso no existe |
-| 409 | `Conflict(...)` | Se rompe una regla de negocio |
+| Código | Cuándo |
+|---|---|
+| 200 | GET y login correctos |
+| 201 | POST correcto (incluye el registro) |
+| 204 | PUT y DELETE correctos |
+| 400 | Datos inválidos del DTO de entrada |
+| 401 | Login con credenciales inválidas, o solicitud sin token a un endpoint protegido |
+| 403 | Token válido, pero sin el rol que exige el endpoint |
+| 404 | El recurso no existe |
+| 409 | Se rompe una regla de negocio |
 
-## Estructura de la solución
-
-```
-MusicaCapas/
-├── Musica.slnx
-├── Scripts/
-│   ├── 01_CrearBaseLocal.sql
-│   └── 02_MusicaDB.sql
-├── pruebas.http
-├── Musica.Entidades/
-│   ├── Album.cs
-│   ├── Cancion.cs
-│   └── Dtos/
-├── Musica.Datos/
-│   ├── MusicaContext.cs
-│   └── Repositorios/
-├── Musica.Negocio/
-│   ├── Excepciones/
-│   ├── Mapeos/MappingProfile.cs
-│   └── Servicios/
-└── Musica.Api/
-    ├── Controllers/
-    └── Program.cs
-```
-
-## Generación del modelo (Scaffold)
-
-```bash
-dotnet ef dbcontext scaffold "Name=ConnectionStrings:MusicaDB" Microsoft.EntityFrameworkCore.SqlServer --project Musica.Datos --startup-project Musica.Api --output-dir Models --context MusicaContext --namespace Musica.Entidades --context-namespace Musica.Datos --no-onconfiguring --force
-```
-
-Después se mueven `Album.cs` y `Cancion.cs` al proyecto `Musica.Entidades` y `MusicaContext.cs` queda en `Musica.Datos`.
 
 ## Pruebas
 
-El archivo `pruebas.http` contiene las pruebas de todos los endpoints y de los códigos 200, 201, 204, 400, 404 y 409. Se ejecutan con la extensión **REST Client** de VS Code, cambiando el puerto de `@host` por el que muestra `dotnet run`.
+El archivo `pruebas.http` contiene las pruebas con un token de cada rol y cubre los códigos 200, 201, 204, 400, 401, 403, 404 y 409. Se ejecutan con la extensión **REST Client** de VS Code.
+
 
 ## Autora
 
