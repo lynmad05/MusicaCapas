@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="ArtistasApi/ArtistasApi.csproj" />
+  <Project Path="GatewayApi/GatewayApi.csproj" />
   <Project Path="Musica.Api/Musica.Api.csproj" />
   <Project Path="Musica.Datos/Musica.Datos.csproj" />
   <Project Path="Musica.Entidades/Musica.Entidades.csproj" />
