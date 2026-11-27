@@ -4,45 +4,45 @@
       "UpstreamPathTemplate": "/gateway/auth/perfil",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/auth/perfil",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 443 } ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 80 } ],
       "AuthenticationOptions": { "AuthenticationProviderKeys": [ "Bearer" ] }
     },
     {
       "UpstreamPathTemplate": "/gateway/auth/{everything}",
       "UpstreamHttpMethod": [ "Post" ],
       "DownstreamPathTemplate": "/api/auth/{everything}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 443 } ]
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 80 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/albumes{everything}",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/albumes{everything}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 443 } ]
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 80 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/canciones{everything}",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/canciones{everything}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 443 } ]
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 80 } ]
     },
     {
       "UpstreamPathTemplate": "/gateway/albumes{everything}",
       "UpstreamHttpMethod": [ "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/albumes{everything}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 443 } ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 80 } ],
       "AuthenticationOptions": { "AuthenticationProviderKeys": [ "Bearer" ] }
     },
     {
       "UpstreamPathTemplate": "/gateway/canciones{everything}",
       "UpstreamHttpMethod": [ "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/canciones{everything}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 443 } ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [ { "Host": "musica-capas.runasp.net", "Port": 80 } ],
       "AuthenticationOptions": { "AuthenticationProviderKeys": [ "Bearer" ] }
     },
     {
