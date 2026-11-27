@@ -46,6 +46,14 @@
       "AuthenticationOptions": { "AuthenticationProviderKeys": [ "Bearer" ] }
     },
     {
+      "UpstreamPathTemplate": "/gateway/artistas-caido{everything}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamPathTemplate": "/api/artistas{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "artistas-caido.invalid", "Port": 443 } ],
+      "AuthenticationOptions": { "AuthenticationProviderKeys": [ "Bearer" ] }
+    },
+    {
       "UpstreamPathTemplate": "/gateway/artistas{everything}",
       "UpstreamHttpMethod": [ "Get" ],
       "DownstreamPathTemplate": "/api/artistas{everything}",

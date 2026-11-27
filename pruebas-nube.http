@@ -1,0 +1,136 @@
+@host = https://musica-gateway.onrender.com
+@json = application/json
+
+### 01 
+# @name loginOyente
+POST {{host}}/gateway/auth/login
+Content-Type: {{json}}
+
+{ "correo": "oyente@musica.com", "clave": "Clave123!" }
+
+
+### 02
+# @name loginCurador
+POST {{host}}/gateway/auth/login
+Content-Type: {{json}}
+
+{ "correo": "curador@musica.com", "clave": "Clave123!" }
+
+
+
+### 03 
+# @name loginGerente
+POST {{host}}/gateway/auth/login
+Content-Type: {{json}}
+
+{ "correo": "gerente@musica.com", "clave": "Clave123!" }
+
+
+### 04 
+POST {{host}}/gateway/auth/registro
+Content-Type: {{json}}
+
+{ "correo": "prueba{{$timestamp}}@musica.com", "clave": "Clave123!" }
+
+### 05 
+POST {{host}}/gateway/auth/login
+Content-Type: {{json}}
+
+{ "correo": "oyente@musica.com", "clave": "ClaveIncorrecta1" }
+
+### 06 
+GET {{host}}/gateway/albumes
+
+### 07 
+GET {{host}}/gateway/canciones
+
+
+### 08
+GET {{host}}/gateway/albumes/1
+
+
+### 09 
+GET {{host}}/gateway/albumes/1
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+### 10 
+GET {{host}}/gateway/auth/perfil
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+
+### 11 
+GET {{host}}/gateway/auth/perfil
+
+### 12
+POST {{host}}/gateway/albumes
+Content-Type: {{json}}
+
+{ "titulo": "Nevermind", "artista": "Nirvana", "genero": "Rock", "anioLanzamiento": 1991 }
+
+
+### 13 
+POST {{host}}/gateway/albumes
+Content-Type: {{json}}
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+{ "titulo": "Nevermind", "artista": "Nirvana", "genero": "Rock", "anioLanzamiento": 1991 }
+
+### 14 
+# @name crearAlbum
+POST {{host}}/gateway/albumes
+Content-Type: {{json}}
+Authorization: Bearer {{loginCurador.response.body.$.token}}
+
+{ "titulo": "FYA", "artista": "BTS", "genero": "kpop", "anioLanzamiento": 1991 }
+
+### 15 
+PUT {{host}}/gateway/albumes/{{crearAlbum.response.body.$.id}}
+Content-Type: {{json}}
+Authorization: Bearer {{loginCurador.response.body.$.token}}
+
+{ "titulo": "FYA", "artista": "BTS", "genero": "kpop", "anioLanzamiento": 1991 }
+
+### 16 
+DELETE {{host}}/gateway/albumes/{{crearAlbum.response.body.$.id}}
+Authorization: Bearer {{loginCurador.response.body.$.token}}
+
+
+
+### 17 
+DELETE {{host}}/gateway/albumes/{{crearAlbum.response.body.$.id}}
+Authorization: Bearer {{loginGerente.response.body.$.token}}
+
+### 18
+GET {{host}}/gateway/albumes/9999
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+
+### 19
+GET {{host}}/gateway/cosa
+
+### 20 
+GET {{host}}/gateway/artistas
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+
+
+### 21
+GET {{host}}/gateway/artistas/1
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+
+
+### 22 
+GET {{host}}/gateway/artistas/999
+Authorization: Bearer {{loginOyente.response.body.$.token}}
+
+
+### 23 
+GET {{host}}/gateway/artistas
+
+### 24 
+GET https://musica-artistas.onrender.com/api/artistas
+
+### 25 
+GET {{host}}/gateway/artistas-caido
+Authorization: Bearer {{loginOyente.response.body.$.token}}
