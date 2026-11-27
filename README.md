@@ -20,7 +20,6 @@ Solución de microservicios con un **API Gateway (Ocelot)** como único punto de
 | **Gateway (GatewayApi)** | https://musica-gateway.onrender.com |
 | **Microservicio 1 (Musica.Api)** | http://musica-capas.runasp.net · [Swagger](http://musica-capas.runasp.net/swagger/index.html) |
 | **Microservicio 2 (ArtistasApi)** | https://musica-artistas.onrender.com |
-| **Video de sustentación** | Se agrega al subir el video |
 
 ## Qué hace cada servicio
 
